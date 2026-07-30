@@ -3,7 +3,7 @@
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
     tikwmUrl: "https://www.tikwm.com/api/?url=",
-    hdApiKey: "Bc2d96bc-d0d5-4803-a452-522ab39af7c5" 
+    hdApiKey: "r8_aiaH0RtT9iRPD1DxKjzFg85xEZowHrM3cwdoF" 
 };
 
 function startApp(){
