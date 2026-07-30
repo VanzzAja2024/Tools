@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VANN MEDIA AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <h1 class="glitch" data-text="VANN MEDIA AI">VANN MEDIA AI</h1>
+        <p>Sistem Siap Digunakan. Klik tombol di bawah untuk masuk ke panel utama.</p>
+
+        <!-- tambahan loader -->
+        <div class="loader"></div>
+
+        <button onclick="startApp()">START SYSTEM</button>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <header>
+            <h1 class="glitch" data-text="VANN MEDIA AI">VANN MEDIA AI</h1>
+            <p>ONLINE // SYSTEM READY</p>
+        </header>
+
+        <div class="grid">
+
+            <div class="card">
+                <div>
+                    <h2>VIDEO TOOL</h2>
+                    <p>TikTok Downloader System</p>
+                </div>
+                <button onclick="runFeature('tt')">OPEN</button>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h2>MP3 ENGINE</h2>
+                    <p>Convert Video To Audio</p>
+                </div>
+                <button onclick="runFeature('mp3')">OPEN</button>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h2>AI BACKGROUND</h2>
+                    <p>Remove Background</p>
+                </div>
+                <button onclick="runFeature('rbg')">OPEN</button>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h2>HD BOOST</h2>
+                    <p>Image Enhancement</p>
+                </div>
+                <button onclick="runFeature('hd')">OPEN</button>
+            </div>
+
+        </div>
+
+        <!-- terminal upgrade -->
+        <div class="terminal" id="text">
+            <span class="typing">SYSTEM ONLINE...</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
