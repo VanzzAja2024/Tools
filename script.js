@@ -1,42 +1,8 @@
-// script.js (Fix Final HD Boost menggunakan Endpoints Langsung Tanpa Upload Perantara)
-
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
     tikwmUrl: "https://www.tikwm.com/api/?url=",
     hdApiKey: "R8_PUoSRElBfqU0Z9ysQAEaIR3vyZLc1o842iaST"
 };
-
-function startApp() {
-    let startScreen = document.getElementById("startScreen");
-    let app = document.getElementById("app");
-    
-    if (startScreen) {
-        startScreen.style.setProperty("display", "none", "important");
-    }
-    if (app) {
-        app.style.setProperty("display", "block", "important");
-    }
-    
-    let text = [
-        "BOOTING VANN CORE...",
-        "LOADING API MODULE...",
-        "CHECKING SECURITY...",
-        "SYSTEM ONLINE"
-    ];
-    let i = 0;
-    let box = document.getElementById("text");
-    
-    if (box) {
-        let timer = setInterval(() => {
-            if (i < text.length) {
-                box.innerHTML = text[i];
-                i++;
-            } else {
-                clearInterval(timer);
-            }
-        }, 500);
-    }
-}
 
 function downloadFile(fileUrl, filename) {
     let box = document.getElementById("text");
@@ -67,6 +33,150 @@ function downloadFile(fileUrl, filename) {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        });
+}
+
+function runFeature(type) {
+    let box = document.getElementById("text");
+    
+    if (type === 'tt') {
+        let url = prompt("Masukkan Link Video TikTok secara lengkap:");
+        if (url && url.trim() !== "") {
+            if (box) box.innerHTML = "[SYSTEM] Sedang memproses video TikTok...";
+            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 0 && data.data && data.data.play) {
+                        downloadFile(data.data.play, 'tiktok_video.mp4');
+                    } else {
+                        if (box) box.innerHTML = "[ERROR] Gagal mengambil video. Periksa kembali linknya.";
+                    }
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'mp3') {
+        let url = prompt("Masukkan Link Video TikTok untuk Audio MP3:");
+        if (url && url.trim() !== "") {
+            if (box) box.innerHTML = "[SYSTEM] Sedang mengambil audio MP3...";
+            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 0 && data.data && data.data.music) {
+                        downloadFile(data.data.music, 'tiktok_audio.mp3');
+                    } else {
+                        if (box) box.innerHTML = "[ERROR] Gagal mengambil audio MP3.";
+                    }
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'rbg') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                if (box) box.innerHTML = "[SYSTEM] Mengunggah gambar ke Remove.bg...";
+                let formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': API_CONFIG.removeBgKey
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) return response.blob();
+                    throw new Error("Gagal memproses gambar dengan Remove.bg.");
+                })
+                .then(blob => {
+                    let blobUrl = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = 'no-background.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                    if (box) box.innerHTML = "[SUCCESS] Background berhasil dihapus!";
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[ERROR] Gagal menghapus background.";
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    } else if (type === 'hd') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                if (box) box.innerHTML = "[SYSTEM] Memproses HD Boost...";
+                
+                let formData = new FormData();
+                formData.append('image', file);
+
+                fetch(`https://api-faa.my.id/faa/hdv4?apikey=${API_CONFIG.hdApiKey}`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Server HD error");
+                    return response.json();
+                })
+                .then(data => {
+                    let hasilUrl = data.url || data.result || data.data || (data.data && data.data.url);
+                    if (hasilUrl) {
+                        if (box) box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
+                        downloadFile(hasilUrl, 'hd-boosted-image.jpg');
+                    } else {
+                        throw new Error("Format URL tidak valid");
+                    }
+                })
+                .catch(err => {
+                    // Fallback otomatis jika server utama bermasalah
+                    if (box) box.innerHTML = "[SYSTEM] Mengalihkan ke server HD Backup...";
+                    
+                    let backupData = new FormData();
+                    backupData.append('image', file);
+
+                    fetch('https://api.deepai.org/api/torch-srgan', {
+                        method: 'POST',
+                        headers: {
+                            'api-key': 'quickstart-edbbe4'
+                        },
+                        body: backupData
+                    })
+                    .then(res => res.json())
+                    .then(backupRes => {
+                        if (backupRes && backupRes.output_url) {
+                            if (box) box.innerHTML = "[SUCCESS] HD Boost Backup berhasil!";
+                            downloadFile(backupRes.output_url, 'hd-boosted-image.jpg');
+                        } else {
+                            throw new Error("Gagal total pada semua server HD.");
+                        }
+                    })
+                    .catch(backupErr => {
+                        if (box) box.innerHTML = "[ERROR] HD Boost gagal: " + backupErr.message;
+                    });
+                });
+            }
+        };
+        fileInput.click();
+    }
+}
         });
 }
 
