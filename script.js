@@ -1,5 +1,3 @@
-// script.js (Final lengkap dengan API HD baru)
-
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
     tikwmUrl: "https://www.tikwm.com/api/?url=",
@@ -148,35 +146,26 @@ function runFeature(type) {
         fileInput.onchange = e => {
             let file = e.target.files[0];
             if (file) {
-                box.innerHTML = "[SYSTEM] Mengunggah gambar sementara...";
+                box.innerHTML = "[SYSTEM] Memproses HD Boost AI...";
                 
                 let formData = new FormData();
-                formData.append('file', file);
+                formData.append('image', file);
 
-                fetch('https://file.io', {
+                fetch(`https://api-faa.my.id/faa/hdv4?apikey=${API_CONFIG.hdApiKey}`, {
                     method: 'POST',
                     body: formData
                 })
-                .then(res => res.json())
-                .then(uploadRes => {
-                    if (uploadRes.success && uploadRes.link) {
-                        let publicImageUrl = uploadRes.link;
-                        box.innerHTML = "[SYSTEM] Memproses HD Boost (api-faa)...";
-
-                        let faaApiUrl = `https://api-faa.my.id/faa/hdv4?image=${encodeURIComponent(publicImageUrl)}`;
-                        return fetch(faaApiUrl);
-                    } else {
-                        throw new Error("Gagal mengunggah gambar.");
-                    }
+                .then(response => {
+                    if (!response.ok) throw new Error("Gagal terhubung ke server HD.");
+                    return response.json();
                 })
-                .then(response => response.json())
                 .then(data => {
                     let hasilUrl = data.url || data.result || data.data;
                     if(hasilUrl) {
                         box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
                         downloadFile(hasilUrl, 'hd-boosted-image.jpg');
                     } else {
-                        box.innerHTML = "[ERROR] API HD tidak mengembalikan file.";
+                        box.innerHTML = "[ERROR] API HD tidak merespons file.";
                     }
                 })
                 .catch(err => {
