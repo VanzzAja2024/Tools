@@ -1,7 +1,9 @@
+// script.js (Update API Key HD sesuai permintaan terbaru)
+
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
     tikwmUrl: "https://www.tikwm.com/api/?url=",
-    hdApiKey: "r8_aiaH0RtT9iRPD1DxKjzFg85xEZowHrM3cwdoF" 
+    hdApiKey: "R8_PUoSRElBfqU0Z9ysQAEaIR3vyZLc1o842iaST" 
 };
 
 function startApp(){
@@ -146,26 +148,36 @@ function runFeature(type) {
         fileInput.onchange = e => {
             let file = e.target.files[0];
             if (file) {
-                box.innerHTML = "[SYSTEM] Memproses HD Boost AI...";
+                box.innerHTML = "[SYSTEM] Mengunggah gambar ke server sementara...";
                 
                 let formData = new FormData();
-                formData.append('image', file);
+                formData.append('file', file);
 
-                fetch(`https://api-faa.my.id/faa/hdv4?apikey=${API_CONFIG.hdApiKey}`, {
+                fetch('https://file.io', {
                     method: 'POST',
                     body: formData
                 })
-                .then(response => {
-                    if (!response.ok) throw new Error("Gagal terhubung ke server HD.");
-                    return response.json();
+                .then(res => res.json())
+                .then(uploadRes => {
+                    if (uploadRes.success && uploadRes.link) {
+                        let publicImageUrl = uploadRes.link;
+                        box.innerHTML = "[SYSTEM] Memproses HD Boost (api-faa)...";
+
+                        let faaApiUrl = `https://api-faa.my.id/faa/hdv4?image=${encodeURIComponent(publicImageUrl)}&apikey=${API_CONFIG.hdApiKey}`;
+                        return fetch(faaApiUrl);
+                    } else {
+                        throw new Error("Gagal mengunggah gambar ke host sementara.");
+                    }
                 })
+                .then(response => response.json())
                 .then(data => {
-                    let hasilUrl = data.url || data.result || data.data;
+                    let hasilUrl = data.url || data.result || data.data || (data.data && data.data.url);
                     if(hasilUrl) {
                         box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
                         downloadFile(hasilUrl, 'hd-boosted-image.jpg');
                     } else {
-                        box.innerHTML = "[ERROR] API HD tidak merespons file.";
+                        box.innerHTML = "[ERROR] API HD tidak mengembalikan URL file.";
+                        console.log("Respon API:", data);
                     }
                 })
                 .catch(err => {
