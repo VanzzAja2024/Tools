@@ -1,4 +1,4 @@
-// script.js (Update API Key HD sesuai permintaan terbaru)
+// script.js (Fix Error dengan Image Uploader Catbox yang support CORS browser)
 
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
@@ -62,6 +62,256 @@ function downloadFile(fileUrl, filename) {
 }
 
 function runFeature(type) {
+    let box = document.getElementById("text");
+    
+    if (type === 'tt') {
+        let url = prompt("Masukkan Link Video TikTok secara lengkap:");
+        if (url && url.trim() !== "") {
+            box.innerHTML = "[SYSTEM] Sedang memproses video TikTok...";
+            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if(data.code === 0 && data.data && data.data.play) {
+                        downloadFile(data.data.play, 'tiktok_video.mp4');
+                    } else {
+                        box.innerHTML = "[ERROR] Gagal mengambil video. Periksa kembali linknya.";
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'mp3') {
+        let url = prompt("Masukkan Link Video TikTok untuk Audio MP3:");
+        if (url && url.trim() !== "") {
+            box.innerHTML = "[SYSTEM] Sedang mengambil audio MP3...";
+            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if(data.code === 0 && data.data && data.data.music) {
+                        downloadFile(data.data.music, 'tiktok_audio.mp3');
+                    } else {
+                        box.innerHTML = "[ERROR] Gagal mengambil audio MP3.";
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'rbg') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                box.innerHTML = "[SYSTEM] Mengunggah gambar ke Remove.bg...";
+                let formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': API_CONFIG.removeBgKey
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if(response.ok) return response.blob();
+                    throw new Error("Gagal memproses gambar dengan Remove.bg.");
+                })
+                .then(blob => {
+                    let blobUrl = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = 'no-background.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                    box.innerHTML = "[SUCCESS] Background berhasil dihapus!";
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Gagal menghapus background.";
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    } else if (type === 'hd') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                box.innerHTML = "[SYSTEM] Mengunggah gambar ke server...";
+                
+                let formData = new FormData();
+                formData.append('reqtype', 'fileupload');
+                formData.append('fileToUpload', file);
+
+                // Menggunakan Catbox.moe agar tidak diblokir CORS oleh browser
+                fetch('https://catbox.moe/user/api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.text())
+                .then(publicUrl => {
+                    if (publicUrl && publicUrl.startsWith('http')) {
+                        box.innerHTML = "[SYSTEM] Memproses HD Boost (api-faa)...";
+
+                        let cleanUrl = publicUrl.trim();
+                        let faaApiUrl = `https://api-faa.my.id/faa/hdv4?image=${encodeURIComponent(cleanUrl)}&apikey=${API_CONFIG.hdApiKey}`;
+                        return fetch(faaApiUrl);
+                    } else {
+                        throw new Error("Gagal mendapatkan link publik gambar.");
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let hasilUrl = data.url || data.result || data.data || (data.data && data.data.url);
+                    if(hasilUrl) {
+                        box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
+                        downloadFile(hasilUrl, 'hd-boosted-image.jpg');
+                    } else {
+                        box.innerHTML = "[ERROR] API HD tidak mengembalikan URL file.";
+                        console.log("Respon API:", data);
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] HD Boost gagal: " + err.message;
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    }
+}
+                .then(data => {
+                    if(data.code === 0 && data.data && data.data.play) {
+                        downloadFile(data.data.play, 'tiktok_video.mp4');
+                    } else {
+                        box.innerHTML = "[ERROR] Gagal mengambil video. Periksa kembali linknya.";
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'mp3') {
+        let url = prompt("Masukkan Link Video TikTok untuk Audio MP3:");
+        if (url && url.trim() !== "") {
+            box.innerHTML = "[SYSTEM] Sedang mengambil audio MP3...";
+            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if(data.code === 0 && data.data && data.data.music) {
+                        downloadFile(data.data.music, 'tiktok_audio.mp3');
+                    } else {
+                        box.innerHTML = "[ERROR] Gagal mengambil audio MP3.";
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'rbg') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                box.innerHTML = "[SYSTEM] Mengunggah gambar ke Remove.bg...";
+                let formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': API_CONFIG.removeBgKey
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if(response.ok) return response.blob();
+                    throw new Error("Gagal memproses gambar dengan Remove.bg.");
+                })
+                .then(blob => {
+                    let blobUrl = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = 'no-background.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                    box.innerHTML = "[SUCCESS] Background berhasil dihapus!";
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] Gagal menghapus background.";
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    } else if (type === 'hd') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                box.innerHTML = "[SYSTEM] Mengunggah gambar ke server...";
+                
+                let formData = new FormData();
+                formData.append('reqtype', 'fileupload');
+                formData.append('fileToUpload', file);
+
+                // Menggunakan Catbox.moe agar tidak diblokir CORS oleh browser
+                fetch('https://catbox.moe/user/api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.text())
+                .then(publicUrl => {
+                    if (publicUrl && publicUrl.startsWith('http')) {
+                        box.innerHTML = "[SYSTEM] Memproses HD Boost (api-faa)...";
+
+                        let cleanUrl = publicUrl.trim();
+                        let faaApiUrl = `https://api-faa.my.id/faa/hdv4?image=${encodeURIComponent(cleanUrl)}&apikey=${API_CONFIG.hdApiKey}`;
+                        return fetch(faaApiUrl);
+                    } else {
+                        throw new Error("Gagal mendapatkan link publik gambar.");
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let hasilUrl = data.url || data.result || data.data || (data.data && data.data.url);
+                    if(hasilUrl) {
+                        box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
+                        downloadFile(hasilUrl, 'hd-boosted-image.jpg');
+                    } else {
+                        box.innerHTML = "[ERROR] API HD tidak mengembalikan URL file.";
+                        console.log("Respon API:", data);
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = "[ERROR] HD Boost gagal: " + err.message;
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    }
+}
     let box = document.getElementById("text");
     
     if (type === 'tt') {
