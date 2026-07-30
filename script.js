@@ -1,19 +1,16 @@
-// script.js (Fix total dan reset fungsi agar tombol START SYSTEM dan semua fitur berjalan normal tanpa eror)
+// script.js (Fix mutlak tombol Start & Seluruh Fitur)
 
 const API_CONFIG = {
     removeBgKey: "2ojdAyn5iV1fkhdjcPbc9Wnd",
-    tikwmUrl: "https://www.tikwm.com/api/?url=",
-    hdApiKey: "R8_PUoSRElBfqU0Z9ysQAEaIR3vyZLc1o842iaST" 
+    tikwmUrl: "https://www.tikwm.com/api/?url="
 };
 
 function startApp(){
     let startScr = document.getElementById("startScreen");
     let appScr = document.getElementById("app");
     
-    if (startScr && appScr) {
-        startScr.style.display = "none";
-        appScr.style.display = "block";
-    }
+    if (startScr) startScr.style.display = "none";
+    if (appScr) appScr.style.display = "block";
     
     let text = [
         "BOOTING VANN CORE...",
@@ -188,67 +185,7 @@ function runFeature(type) {
         fileInput.click();
     }
 }
-            box.innerHTML = "[SYSTEM] Sedang memproses video TikTok...";
-            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
-                .then(response => response.json())
-                .then(data => {
-                    if(data.code === 0 && data.data && data.data.play) {
-                        downloadFile(data.data.play, 'tiktok_video.mp4');
-                    } else {
-                        box.innerHTML = "[ERROR] Gagal mengambil video. Periksa kembali linknya.";
-                    }
-                })
-                .catch(err => {
-                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
-                    console.error(err);
-                });
-        }
-    } else if (type === 'mp3') {
-        let url = prompt("Masukkan Link Video TikTok untuk Audio MP3:");
-        if (url && url.trim() !== "") {
-            box.innerHTML = "[SYSTEM] Sedang mengambil audio MP3...";
-            fetch(API_CONFIG.tikwmUrl + encodeURIComponent(url))
-                .then(response => response.json())
-                .then(data => {
-                    if(data.code === 0 && data.data && data.data.music) {
-                        downloadFile(data.data.music, 'tiktok_audio.mp3');
-                    } else {
-                        box.innerHTML = "[ERROR] Gagal mengambil audio MP3.";
-                    }
-                })
-                .catch(err => {
-                    box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
-                    console.error(err);
-                });
-        }
-    } else if (type === 'rbg') {
-        let fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.onchange = e => {
-            let file = e.target.files[0];
-            if (file) {
-                box.innerHTML = "[SYSTEM] Mengunggah gambar ke Remove.bg...";
-                let formData = new FormData();
-                formData.append('image_file', file);
-                formData.append('size', 'auto');
-
-                fetch('https://api.remove.bg/v1.0/removebg', {
-                    method: 'POST',
-                    headers: {
-                        'X-Api-Key': API_CONFIG.removeBgKey
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if(response.ok) return response.blob();
-                    throw new Error("Gagal memproses gambar dengan Remove.bg.");
-                })
-                .then(blob => {
-                    let blobUrl = URL.createObjectURL(blob);
-                    let a = document.createElement('a');
-                    a.href = blobUrl;
-                    a.download = 'no-background.png';
+ground.png';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
