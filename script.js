@@ -106,6 +106,115 @@ function runFeature(type) {
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
+                    window.URL.revokeObjectURL(blobUrl);
+                    if (box) box.innerHTML = "[SUCCESS] Background berhasil dihapus!";
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[ERROR] Gagal menghapus background.";
+                    console.error(err);
+                });
+            }
+        };
+        fileInput.click();
+    } else if (type === 'hd') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                if (box) box.innerHTML = "[SYSTEM] Memproses HD Boost...";
+                
+                let formData = new FormData();
+                formData.append('image', file);
+
+                fetch(`https://api-faa.my.id/faa/hdv4?apikey=${API_CONFIG.hdApiKey}`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Server HD error");
+                    return response.json();
+                })
+                .then(data => {
+                    let hasilUrl = data.url || data.result || data.data || (data.data && data.data.url);
+                    if (hasilUrl) {
+                        if (box) box.innerHTML = "[SUCCESS] HD Boost berhasil diproses!";
+                        downloadFile(hasilUrl, 'hd-boosted-image.jpg');
+                    } else {
+                        throw new Error("Format URL tidak valid");
+                    }
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[SYSTEM] Mengalihkan ke server HD Backup...";
+                    
+                    let backupData = new FormData();
+                    backupData.append('image', file);
+
+                    fetch('https://api.deepai.org/api/torch-srgan', {
+                        method: 'POST',
+                        headers: {
+                            'api-key': 'quickstart-edbbe4'
+                        },
+                        body: backupData
+                    })
+                    .then(res => res.json())
+                    .then(backupRes => {
+                        if (backupRes && backupRes.output_url) {
+                            if (box) box.innerHTML = "[SUCCESS] HD Boost Backup berhasil!";
+                            downloadFile(backupRes.output_url, 'hd-boosted-image.jpg');
+                        } else {
+                            throw new Error("Gagal total pada semua server HD.");
+                        }
+                    })
+                    .catch(backupErr => {
+                        if (box) box.innerHTML = "[ERROR] HD Boost gagal: " + backupErr.message;
+                    });
+                });
+            }
+        };
+        fileInput.click();
+    }
+}
+                        if (box) box.innerHTML = "[ERROR] Gagal mengambil audio MP3.";
+                    }
+                })
+                .catch(err => {
+                    if (box) box.innerHTML = "[ERROR] Jaringan atau API bermasalah.";
+                    console.error(err);
+                });
+        }
+    } else if (type === 'rbg') {
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = e => {
+            let file = e.target.files[0];
+            if (file) {
+                if (box) box.innerHTML = "[SYSTEM] Mengunggah gambar ke Remove.bg...";
+                let formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto');
+
+                fetch('https://api.remove.bg/v1.0/removebg', {
+                    method: 'POST',
+                    headers: {
+                        'X-Api-Key': API_CONFIG.removeBgKey
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) return response.blob();
+                    throw new Error("Gagal memproses gambar dengan Remove.bg.");
+                })
+                .then(blob => {
+                    let blobUrl = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = 'no-background.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                     URL.revokeObjectURL(blobUrl);
                     if (box) box.innerHTML = "[SUCCESS] Background berhasil dihapus!";
                 })
